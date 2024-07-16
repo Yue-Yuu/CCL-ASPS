@@ -3,7 +3,7 @@ import numpy as np
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import GATConv,GCNConv
-from models.PGAT import GATConv as PGATConv
+# from models.PGAT import GATConv as PGATConv
 
 class DAE(nn.Module):
     def __init__(self, input_data, n_input, n_hidden, scale=0.2):
@@ -140,27 +140,27 @@ class model_reconstruct(nn.Module):
         self.contrast_drug_2 = Model_Contrast(self.gcn_drug_outdim, args.tau, args.lam)
 
         """
-        PGAT
+        GAT
         """
         nhead = 4
         negative_slope = 0.2
         dropout = 0.2
-        self.PGAT1_drug = PGATConv(args.drug_dim, self.gcn_drug_outdim,nhead,True,negative_slope,dropout)
-        self.PGAT2_drug = PGATConv(args.drug_dim, self.gcn_drug_outdim, nhead, True, negative_slope,dropout)
-        self.PGAT3_drug = PGATConv(args.drug_dim, self.gcn_drug_outdim, nhead, True, negative_slope,dropout)
-        self.PGAT4_drug = PGATConv(args.drug_dim, self.gcn_drug_outdim, nhead, True, negative_slope,dropout)
-        self.PGAT1_protein = PGATConv(args.protein_dim, self.gcn_protein_outdim,nhead, True, negative_slope,dropout)
-        self.PGAT2_protein = PGATConv(args.protein_dim, self.gcn_protein_outdim,nhead, True, negative_slope,dropout)
-        self.PGAT3_protein = PGATConv(args.protein_dim, self.gcn_protein_outdim,nhead, True, negative_slope,dropout)
+        self.GAT1_drug = GATConv(args.drug_dim, self.gcn_drug_outdim,nhead,True,negative_slope,dropout)
+        self.GAT2_drug = GATConv(args.drug_dim, self.gcn_drug_outdim, nhead, True, negative_slope,dropout)
+        self.GAT3_drug = GATConv(args.drug_dim, self.gcn_drug_outdim, nhead, True, negative_slope,dropout)
+        self.GAT4_drug = GATConv(args.drug_dim, self.gcn_drug_outdim, nhead, True, negative_slope,dropout)
+        self.GAT1_protein = GATConv(args.protein_dim, self.gcn_protein_outdim,nhead, True, negative_slope,dropout)
+        self.GAT2_protein = GATConv(args.protein_dim, self.gcn_protein_outdim,nhead, True, negative_slope,dropout)
+        self.GAT3_protein = GATConv(args.protein_dim, self.gcn_protein_outdim,nhead, True, negative_slope,dropout)
 
-        """第二层PGAT"""
-        self.PGAT12_drug = PGATConv(self.gcn_drug_outdim*nhead, self.gcn_drug_outdim,1, False, negative_slope,dropout)
-        self.PGAT22_drug = PGATConv(self.gcn_drug_outdim*nhead, self.gcn_drug_outdim,1, False, negative_slope,dropout)
-        self.PGAT32_drug = PGATConv(self.gcn_drug_outdim*nhead, self.gcn_drug_outdim,1, False, negative_slope,dropout)
-        self.PGAT42_drug = PGATConv(self.gcn_drug_outdim*nhead, self.gcn_drug_outdim,1, False, negative_slope,dropout)
-        self.PGAT12_protein = PGATConv(self.gcn_protein_outdim*nhead, self.gcn_protein_outdim,1,False, negative_slope,dropout)
-        self.PGAT22_protein = PGATConv(self.gcn_protein_outdim*nhead, self.gcn_protein_outdim,1,False, negative_slope,dropout)
-        self.PGAT32_protein = PGATConv(self.gcn_protein_outdim*nhead, self.gcn_protein_outdim,1,False, negative_slope,dropout)
+        """第二层GAT"""
+        self.GAT12_drug = GATConv(self.gcn_drug_outdim*nhead, self.gcn_drug_outdim,1, False, negative_slope,dropout)
+        self.GAT22_drug = GATConv(self.gcn_drug_outdim*nhead, self.gcn_drug_outdim,1, False, negative_slope,dropout)
+        self.GAT32_drug = GATConv(self.gcn_drug_outdim*nhead, self.gcn_drug_outdim,1, False, negative_slope,dropout)
+        self.GAT42_drug = GATConv(self.gcn_drug_outdim*nhead, self.gcn_drug_outdim,1, False, negative_slope,dropout)
+        self.GAT12_protein = GATConv(self.gcn_protein_outdim*nhead, self.gcn_protein_outdim,1,False, negative_slope,dropout)
+        self.GAT22_protein = GATConv(self.gcn_protein_outdim*nhead, self.gcn_protein_outdim,1,False, negative_slope,dropout)
+        self.GAT32_protein = GATConv(self.gcn_protein_outdim*nhead, self.gcn_protein_outdim,1,False, negative_slope,dropout)
 
         """
         卷积融合来自多个sim net的embs
@@ -302,24 +302,24 @@ class model_reconstruct(nn.Module):
         p_alpha_ori_3 = p_alpha_ori_3.view(-1, 1)
 
 
-        """第一层PGAT"""
-        drug_embs_1 = self.PGAT1_drug(drug_emb, d_edge_index_1,alpha_ori=d_alpha_ori_1)
-        drug_embs_2 = self.PGAT2_drug(drug_emb, d_edge_index_2, alpha_ori=d_alpha_ori_2)
-        drug_embs_3 = self.PGAT3_drug(drug_emb, d_edge_index_3, alpha_ori=d_alpha_ori_3)
-        drug_embs_4 = self.PGAT4_drug(drug_emb, d_edge_index_4, alpha_ori=d_alpha_ori_4)
-        protein_embs_1 = self.PGAT1_protein(protein_emb, p_edge_index_1, alpha_ori=p_alpha_ori_1)
-        protein_embs_2 = self.PGAT2_protein(protein_emb, p_edge_index_2, alpha_ori=p_alpha_ori_2)
-        protein_embs_3 = self.PGAT3_protein(protein_emb, p_edge_index_3, alpha_ori=p_alpha_ori_3)
+        """第一层GAT"""
+        drug_embs_1 = self.GAT1_drug(drug_emb, d_edge_index_1)
+        drug_embs_2 = self.GAT2_drug(drug_emb, d_edge_index_2)
+        drug_embs_3 = self.GAT3_drug(drug_emb, d_edge_index_3)
+        drug_embs_4 = self.GAT4_drug(drug_emb, d_edge_index_4)
+        protein_embs_1 = self.GAT1_protein(protein_emb, p_edge_index_1)
+        protein_embs_2 = self.GAT2_protein(protein_emb, p_edge_index_2)
+        protein_embs_3 = self.GAT3_protein(protein_emb, p_edge_index_3)
 
-        """第二层PGAT"""
-        drug_embs_12 = self.PGAT12_drug(drug_embs_1, d_edge_index_1, alpha_ori=d_alpha_ori_1)
-        drug_embs_22 = self.PGAT22_drug(drug_embs_2, d_edge_index_2, alpha_ori=d_alpha_ori_2)
-        drug_embs_32 = self.PGAT32_drug(drug_embs_3, d_edge_index_3, alpha_ori=d_alpha_ori_3)
-        drug_embs_42 = self.PGAT42_drug(drug_embs_4, d_edge_index_4, alpha_ori=d_alpha_ori_4)
+        """第二层GAT"""
+        drug_embs_12 = self.GAT12_drug(drug_embs_1, d_edge_index_1)
+        drug_embs_22 = self.GAT22_drug(drug_embs_2, d_edge_index_2)
+        drug_embs_32 = self.GAT32_drug(drug_embs_3, d_edge_index_3)
+        drug_embs_42 = self.GAT42_drug(drug_embs_4, d_edge_index_4)
 
-        protein_embs_12 = self.PGAT12_protein(protein_embs_1, p_edge_index_1, alpha_ori=p_alpha_ori_1)
-        protein_embs_22 = self.PGAT22_protein(protein_embs_2, p_edge_index_2, alpha_ori=p_alpha_ori_2)
-        protein_embs_32 = self.PGAT32_protein(protein_embs_3, p_edge_index_3, alpha_ori=p_alpha_ori_3)
+        protein_embs_12 = self.GAT12_protein(protein_embs_1, p_edge_index_1)
+        protein_embs_22 = self.GAT22_protein(protein_embs_2, p_edge_index_2)
+        protein_embs_32 = self.GAT32_protein(protein_embs_3, p_edge_index_3)
 
         """
         todo 使用卷积操作融合多个sim net的特征
